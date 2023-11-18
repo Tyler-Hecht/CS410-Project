@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>PyScript Demo 1</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <py-config>
+      [[runtimes]]
+      src = "runtime/pyodide.js"
+      name = "pyodide-0.21.3"
+      lang = "python"
+    </py-config>
+    <link rel="icon" type="icons/png" href="/icon-128.png" />
+    <link rel="stylesheet" href="popup.css" />
+    <link rel="stylesheet" href="runtime/pyscript.css" />
+    <script defer src="runtime/pyscript.js"></script>
+  </head>
+  
+  <body>
+    <input id="input" type="text" placeholder="Enter a query"/>
+    <button id="button">Run</button>
+
+    <py-script src="script.py"></py-script>
+  </body>
+</html>
+
