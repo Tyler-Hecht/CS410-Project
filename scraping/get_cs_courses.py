@@ -33,7 +33,17 @@ for block in course_blocks:
     # print(course_desc)
     # print()
 
-    course_dict[course_name] = {"title": course_title, "description": course_desc, "text": []}
+    course_dict[course_name] = {"title": course_title, "terms": [], "description": course_desc, "text": []}
+
+    # get the terms  
+    terms_url = "https://courses.illinois.edu/schedule/terms/" + course_name.split()[0] + "/" + course_name.split()[1]
+    terms_page = requests.get(terms_url)
+    terms_soup = BeautifulSoup(terms_page.content, 'html.parser')
+    # get <a> tags in id app-content
+    print(terms_url)
+    terms = terms_soup.find("div", id="app-content").find_all("a")
+    for term in terms:
+        course_dict[course_name]["terms"].append(term.text.strip())
 
 # pickle the dictionary
 import pickle
