@@ -8,16 +8,23 @@
       font-size: x-large;
     }
   </style>
+  <py-config type="toml">
+    packages = ["numpy"]
+    [[fetch]]
+    files = ['query.py', 'courses_dict.pkl']
+    from = '.'
+  </py-config>
 
 </head>
 
 <body style="min-width:500px"></body>
 <!-- input -->
-<input type="text" id="input" placeholder="Enter your name" />
-<button id="button">Click me</button>
+<input type="text" id="query" placeholder="Enter your name" />
+<button id="button" py-click="runPython()">Click me</button>
 <!-- output -->
-<div id="output"></div>
+<div id="results">a</div>
 <script type='py' src="script.py"></script>
+
 </body>
 
 </html>

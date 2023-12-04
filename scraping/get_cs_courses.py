@@ -47,5 +47,5 @@ for block in course_blocks:
 
 # pickle the dictionary
 import pickle
-with open("scraping/courses_dict.pkl", "wb") as f:
+with open("courses_dict.pkl", "wb") as f:
     pickle.dump(course_dict, f)
