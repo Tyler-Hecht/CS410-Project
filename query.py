@@ -1,15 +1,28 @@
 import pickle
-# get lemmatization and tokenization from sklearn
-from sklearn.feature_extraction.text import CountVectorizer
-from textblob import TextBlob, Word
+import pandas as pd
+
+K1_DEFAULT = 1.2
+B_DEFAULT = 0.75
+
+with open("stopwords.txt", "r") as f:
+    stopwords = f.read().splitlines()
 
 # read scraping/courses_dict.pkl
 with open("courses_df.pkl", "rb") as f:
     courses_df = pickle.load(f)
 
-SYNONYM_WEIGHT = 0
+def lemmatize(word):
+    return word
 
-def BM25(term, course, k1, b):
+def tokenize(text):
+    # tokenize text, removing punctuation
+    text = text.lower()
+    punctuation = "!\"#$%&'()*+,./:;<=>?@[\\]^_`{|}~"
+    for char in punctuation:
+        text = text.replace(char, " ")
+    return text.split()
+
+def BM25(term, course, k1=K1_DEFAULT, b=B_DEFAULT):
     # calculates BM25 score for term in course
 
     # check if term is in course
@@ -21,16 +34,16 @@ def BM25(term, course, k1, b):
 
     return score
 
-def query(query_text, k1=1.2, b=0.75):
+def query(query_text, k1=K1_DEFAULT, b=B_DEFAULT, data = courses_df, tokenize=tokenize, lemmatize=lemmatize):
     # returns top 5 courses that match the query
     query_text = query_text.lower()
 
-    # tokenize query
-    query_blob = TextBlob(query_text)
-    query_tokens = query_blob.words
+    # tokenize and lemmatize query
+    query_lemmas = []
+    for word in tokenize(query_text):
+        query_lemmas.append(lemmatize(word))
 
-    # lemmatize query
-    query_lemmas = [Word(token).lemmatize() for token in query_tokens]
+    print(query_lemmas)
 
     # calculate BM25 scores for each course
     scores = {}
@@ -38,20 +51,6 @@ def query(query_text, k1=1.2, b=0.75):
         scores[course] = 0
         for term in query_lemmas:
             scores[course] += BM25(term, course, k1, b)
-
-    # increase the score based on synonyms
-    synonym_scores = {}
-    for course in courses_df.index:
-        synonym_scores[course] = 0
-        for term in query_lemmas:
-            for synset in Word(term).synsets:
-                for synonym in synset.lemmas():
-                    if synonym.name() in courses_df.columns:
-                        synonym_scores[course] += BM25(synonym.name(), course, k1, b)
-
-    # weigh score based on synonyms
-    for term in synonym_scores:
-        scores[course] = scores[course] * (1 - SYNONYM_WEIGHT) + synonym_scores[term] * SYNONYM_WEIGHT
 
     # sort courses by score
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
@@ -66,5 +65,16 @@ def query(query_text, k1=1.2, b=0.75):
 
     return top_courses
 
-
-print(query("text retrieval"))
+if __name__ == "__main__":
+    import nltk
+    nltk.download("wordnet")
+    from nltk.stem import WordNetLemmatizer
+    from nltk.corpus import wordnet
+    # ask for input
+    with open("courses_df_lemmatized.pkl", "rb") as f:
+        courses_df_lemmatized = pickle.load(f)
+    lemmatizer = WordNetLemmatizer()
+    while True:
+        query_text = input("Enter query: ")
+        results = query(query_text, lemmatize=lemmatizer.lemmatize, data=courses_df_lemmatized, tokenize=nltk.word_tokenize)
+        print(results)

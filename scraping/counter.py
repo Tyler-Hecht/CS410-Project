@@ -8,16 +8,16 @@ nltk.download('words')
 import nltk.corpus
 import random
 import pandas as pd
-import textblob as TextBlob
+from nltk import WordNetLemmatizer
 
 
 # Limits to tokenization and lemmitization, respectively
-MAX_TOKENIZER_LEN = 100000000
-MAX_WORDS = 20000000
+MAX_TOKENIZER_LEN = 20000000
+MAX_WORDS = 10000000
 
 # Weights for title and description
-TITLE_WEIGHT = 20
-DESCRIPTION_WEIGHT = 20
+TITLE_WEIGHT = 50
+DESCRIPTION_WEIGHT = 50
 
 # organizes the text into one large dataframe with words as columns and courses as rows
 # the values represent the number of times the word appears in the course
@@ -26,10 +26,19 @@ with open("../courses_dict.pkl", "rb") as f:
     courses_dict = pickle.load(f)
 
 def lemmatize(word):
-    # lemmatizes word with TextBlob
-    return TextBlob.Word(word).lemmatize()
+    return word
+
+def tokenize(text):
+    # tokenize text, removing punctuation
+    text = text.lower()
+    punctuation = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+    for char in punctuation:
+        text = text.replace(char, " ")
+    return text.split()
 
 stopwords = set(nltk.corpus.stopwords.words('english'))
+with open("../words.txt", "r") as f:
+    valid_words = set(f.read().splitlines())
 
 # combine each term's text into one string and add the course title and description
 all_words_dict = {}
@@ -48,7 +57,7 @@ for course in tqdm(all_words_dict, position=0, leave=True):
     # go to the last space
     last_space = words.rfind(" ")
     words = words[:last_space]
-    words = nltk.word_tokenize(words)
+    words = tokenize(words)
     if len(words) > MAX_WORDS:
         words = random.sample(words, MAX_WORDS)
     lemmatized_words = []
@@ -62,16 +71,14 @@ print("done tokenizing and lemmatizing")
 # find unique words
 unique_words = set()
 for course in tqdm(lemmatized_dict):
-    # get valid words from nltk
-    valid_words = nltk.corpus.words.words()
     course_words = lemmatized_dict[course]
     intersection = set(valid_words).intersection(course_words)
     unique_words = unique_words.union(intersection)
     # add in words from title and description
     title = courses_dict[course]["title"]
     description = courses_dict[course]["description"]
-    title_words = nltk.word_tokenize(title)
-    description_words = nltk.word_tokenize(description)
+    title_words = tokenize(title)
+    description_words = tokenize(title)
     lemmatized_title_words = []
     lemmatized_description_words = []
     for word in tqdm(title_words, position=1, leave=False):
@@ -98,8 +105,8 @@ for course in tqdm(lemmatized_dict, position=0, leave=True):
     course_dict = {}
     title = courses_dict[course]["title"]
     description = courses_dict[course]["description"]
-    title_words = nltk.word_tokenize(title)
-    description_words = nltk.word_tokenize(description)
+    title_words = tokenize(title)
+    description_words = tokenize(title)
     lemmatized_title_words = []
     lemmatized_description_words = []
     for word in tqdm(title_words, position=1, leave=False):
@@ -140,5 +147,5 @@ print(f"done creating dataframe, shape: {courses_df.shape}")
 # courses_df = courses_df.groupby(courses_df.columns, axis=1).sum()
 
 # save courses_df
-with open("../courses_df2.pkl", "wb") as f:
+with open("../courses_df.pkl", "wb") as f:
     pickle.dump(courses_df, f)

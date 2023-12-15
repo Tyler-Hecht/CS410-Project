@@ -1,5 +1,6 @@
 from js import document, fetch
 from pyodide.ffi import create_proxy
+import pickle
 from query import query
 
 def runPython(*args, **kwargs):

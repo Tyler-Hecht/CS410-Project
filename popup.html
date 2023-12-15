@@ -9,9 +9,9 @@
     }
   </style>
   <py-config type="toml">
-    packages = ["pandas", "textblob"]
+    packages = ["pandas", "nltk"]
     [[fetch]]
-    files = ['query.py', 'courses_df.pkl', 'stopwords.txt']
+    files = ['query.py', 'courses_df.pkl', 'english.pickle', 'stopwords.txt']
     from = '.'
   </py-config>
 
