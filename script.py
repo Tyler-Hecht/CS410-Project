@@ -8,7 +8,7 @@ def runPython(*args, **kwargs):
     results = query(query_text)
     document.getElementById("results").innerHTML = ""
     output = ""
-    for course, score in results:
+    for course in results:
         url = f"https://cs.illinois.edu/academics/courses/{course.split()[0]}{course.split()[1]}"
         output += f"{course}<br>"
         # url in smaller font

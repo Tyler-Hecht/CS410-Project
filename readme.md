@@ -1,5 +1,5 @@
 # CS 410 Project
-Tyler Hecht
+Tyler Hecht (thecht2)
 
 ## Video link:
 
@@ -21,6 +21,8 @@ The data was processed by tokenizing, lemmatizing, and removing stop words. Addi
 
 The BM25 algorithm is used to rank the courses based on a query. The query was processed in the same way as the data, and the BM25 algorithm was applied to the query and each course. The top 5 courses are returned as the results. The values of k1 and b were tuned to 1.2 and 0.75 by default, respectively, but can be changed.
 
+## Using the system
+
 ### Extension
 
 The querying system was made into a Chrome extension using PyScript. The extension provides a browser-based interface for querying the system. The user can enter a query, and the top 5 courses will be displayed. The link to the course can be copied from the results.
@@ -33,4 +35,12 @@ To install the extension, navigate to chrome://extensions in Google Chrome. Enab
 
 To use the extension, click on the extension icon in the top right of the browser and click on this extension. You can then use the extension to query the system.
 
+### Command line
+
+The querying system can also be used from the command line. It uses a version of the data that is more accurate since it can use the nltk lemmatizer. You can simply run the file `query.py` to query the system. Run the appropriate command for your operating system:\
+`py query.py`\
+`python query.py`\
+`python3 query.py`
+
+## Documentation
 

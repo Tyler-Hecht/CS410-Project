@@ -43,8 +43,6 @@ def query(query_text, k1=K1_DEFAULT, b=B_DEFAULT, data = courses_df, tokenize=to
     for word in tokenize(query_text):
         query_lemmas.append(lemmatize(word))
 
-    print(query_lemmas)
-
     # calculate BM25 scores for each course
     scores = {}
     for course in courses_df.index:
