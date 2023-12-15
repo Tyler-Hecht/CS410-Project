@@ -9,22 +9,21 @@
     }
   </style>
   <py-config type="toml">
-    packages = ["numpy"]
+    packages = ["numpy", "nltk", "scikit-learn"]
     [[fetch]]
-    files = ['query.py', 'courses_dict.pkl']
+    files = ['query.py', 'courses_df.pkl']
     from = '.'
   </py-config>
 
 </head>
 
-<body style="min-width:500px"></body>
+<body style="min-width:500px; min-height:500px"></body>
 <!-- input -->
 <input type="text" id="query" placeholder="Enter your name" />
-<button id="button" py-click="runPython()">Click me</button>
+<button id="button" py-click="runPython()">Search</button>
 <!-- output -->
-<div id="results">a</div>
+<div id="results"></div>
 <script type='py' src="script.py"></script>
-
 </body>
 
 </html>
