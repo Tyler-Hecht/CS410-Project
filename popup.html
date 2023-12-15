@@ -17,10 +17,15 @@
 
 </head>
 
-<body style="min-width:500px; min-height:500px"></body>
+<body style="min-width:500px; min-height:400px"></body>
 <!-- input -->
-<input type="text" id="query" placeholder="Enter your name" />
+<input type="text" id="query" placeholder="Enter query" />
 <button id="button" py-click="runPython()">Search</button>
+<!-- input for k1 and b -->
+<input type="text" id="k1" placeholder="Enter k1 (default 1.2)" />
+<input type="text" id="b" placeholder="Enter b (default 0.75)" />
+<!-- excluded courses, full width -->
+<input type="text" id="exclude" placeholder="Enter courses to exclude (comma-separated)" style="width:100%" />
 <!-- output -->
 <div id="results"></div>
 <script type='py' src="script.py"></script>

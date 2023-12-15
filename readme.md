@@ -44,3 +44,27 @@ The querying system can also be used from the command line. It uses a version of
 
 ## Documentation
 
+### Scraping
+
+#### get_cs_courses.py
+
+This file scrapes the UIUC course explorer website for CS courses. It gets the title, description, and terms offered for each course and saves them to the file `courses_dict.pkl`.
+
+#### crawling.py
+
+This file uses BeautifulSoup to scrape data from each course for many terms. For each term, it explores a certain number of links and scrapes the text from those pages. It saves the data to the file `courses_dict.pkl`.
+
+Scraping all the data would take a long time, so limits can be specified:
+- `MAX_TERMS` is the maximum number of terms to scrape for each course
+- `MAX_LINKS` is the maximum number of links to explore for each term
+- `TIMEOUT` is the timeout for each page request
+
+### counter.py
+
+This file creates the dataframe with counts for each word in each course. It uses the file `courses_dict.pkl` to get the data. It saves the dataframe to the file `courses_df.pkl`.
+
+Configuration options:
+- `MAX_TOKENIZER_LEN` is the maximum length of the data to tokenize for each course
+- `MAX_WORDS` is the maximum number of words to keep for each course
+- `TITLE_WEIGHT` is the weight to give to the title of the course when counting words
+- `DESCRIPTION_WEIGHT` is the weight to give to the description of the course when counting words

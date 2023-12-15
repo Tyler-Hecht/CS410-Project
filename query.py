@@ -34,7 +34,7 @@ def BM25(term, course, k1=K1_DEFAULT, b=B_DEFAULT):
 
     return score
 
-def query(query_text, k1=K1_DEFAULT, b=B_DEFAULT, data = courses_df, tokenize=tokenize, lemmatize=lemmatize):
+def query(query_text, excluded_courses = [], k1=K1_DEFAULT, b=B_DEFAULT, data = courses_df, tokenize=tokenize, lemmatize=lemmatize):
     # returns top 5 courses that match the query
     query_text = query_text.lower()
 
@@ -53,10 +53,10 @@ def query(query_text, k1=K1_DEFAULT, b=B_DEFAULT, data = courses_df, tokenize=to
     # sort courses by score
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-    # return top 5 courses with scores above 0
+    # return top 5 courses with scores above 0 that are not in excluded_courses
     top_courses = []
     for course in sorted_scores:
-        if course[1] > 0:
+        if course[1] > 0 and course[0] not in excluded_courses:
             top_courses.append(course[0])
         if len(top_courses) == 5:
             break

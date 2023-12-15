@@ -5,7 +5,23 @@ from query import query
 
 def runPython(*args, **kwargs):
     query_text = document.getElementById("query").value
-    results = query(query_text)
+    k1 = document.getElementById("k1").value
+    b = document.getElementById("b").value
+    # check that k1 and b are valid
+    try:
+        k1 = float(k1)
+    except:
+        k1 = 1.2
+    try:
+        b = float(b)
+    except:
+        b = 0.75
+    # excluded courses
+    excluded_courses = document.getElementById(f"exclude").value
+    excluded_courses = excluded_courses.split(",")
+    excluded_courses = [course.strip().upper() for course in excluded_courses]
+    # query
+    results = query(query_text, excluded_courses, k1, b)
     document.getElementById("results").innerHTML = ""
     output = ""
     for course in results:
