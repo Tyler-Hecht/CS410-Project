@@ -3,7 +3,7 @@ Tyler Hecht (thecht2)
 
 ## Video link:
 
-[http://www.youtube.com/watch?v=](http://www.youtube.com/watch?v=)
+[https://youtu.be/hL-R-dziSeU](https://youtu.be/hL-R-dziSeU)
 
 ## Project Description
 
@@ -45,6 +45,8 @@ The querying system can also be used from the command line. It uses a version of
 ## Documentation
 
 ### Scraping
+
+To scrape, the following files can be run in sequence. However, scraping takes a very long time (depending on the limits specified), so the data is already provided in the file `courses_df.pkl`.
 
 #### get_cs_courses.py
 
