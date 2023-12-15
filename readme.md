@@ -59,7 +59,7 @@ Scraping all the data would take a long time, so limits can be specified:
 - `MAX_LINKS` is the maximum number of links to explore for each term
 - `TIMEOUT` is the timeout for each page request
 
-### counter.py
+#### counter.py
 
 This file creates the dataframe with counts for each word in each course. It uses the file `courses_dict.pkl` to get the data. It saves the dataframe to the file `courses_df.pkl`.
 
@@ -68,3 +68,29 @@ Configuration options:
 - `MAX_WORDS` is the maximum number of words to keep for each course
 - `TITLE_WEIGHT` is the weight to give to the title of the course when counting words
 - `DESCRIPTION_WEIGHT` is the weight to give to the description of the course when counting words
+
+### Querying
+
+#### query.py
+
+This file provides functions to query the system. It uses the file `courses_df.pkl` to get the data.
+
+The function `BM25` implements the BM25 algorithm. It takes in a query and returns a list of the top 5 courses that match the query. On the first two parameters are required.\
+Parameters:
+- `term`: The word (term)
+- `course` The course (document)
+- `k1`: The k1 parameter for BM25
+- `b`: The b parameter for BM25
+
+Returns:
+- The BM25 score for the term and course
+
+The function `query` takes in a query and prints the top 5 courses that match the query. Only the first parameter is required.\
+Parameters:
+- `query_text`: The query text
+- `excluded_courses`: A list of courses to exclude from the results
+- `k1`: The k1 parameter for BM25
+- `b`: The b parameter for BM25
+- `data`: The dataframe containing the data
+- `tokenize`: The tokenization function
+- `lemmatize`: The lemmatization function
