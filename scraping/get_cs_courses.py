@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+# get basic course info from the catalog
+
 catalog_url = "http://catalog.illinois.edu/courses-of-instruction/cs/"
 
 # Get the HTML of the page
@@ -47,5 +49,5 @@ for block in course_blocks:
 
 # pickle the dictionary
 import pickle
-with open("courses_dict.pkl", "wb") as f:
+with open("../courses_dict.pkl", "wb") as f:
     pickle.dump(course_dict, f)
