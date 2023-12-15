@@ -1,48 +1,70 @@
 import pickle
+# get lemmatization and tokenization from sklearn
+from sklearn.feature_extraction.text import CountVectorizer
+from textblob import TextBlob, Word
 
 # read scraping/courses_dict.pkl
-with open("courses_dict.pkl", "rb") as f:
-    courses_dict = pickle.load(f)
+with open("courses_df.pkl", "rb") as f:
+    courses_df = pickle.load(f)
 
-# given a query, return a list of courses that match the query
+SYNONYM_WEIGHT = 0
 
-def listify(query):
-    # remove punctuation and split query into words
-    if type(query) != str:
-        query = str(query)
-    query = query.lower()
-    for i in range(len(query)):
-        # filter by alphanumeric characters or "-"
-        if not query[i].isalnum() and query[i] != "-":
-            query = query[:i] + " " + query[i+1:]
-    query = query.split()
-    return query
+def BM25(term, course, k1, b):
+    # calculates BM25 score for term in course
 
-def query(query):
-    TITLE_WEIGHT = 5
-    DESC_WEIGHT = 2
+    # check if term is in course
+    if term not in courses_df.columns:
+        return 0
+    
+    # calculate score
+    score = courses_df.loc[course, term] * (k1 + 1) / (courses_df.loc[course, term] + k1 * (1 - b + b * courses_df.loc[course, "length"] / courses_df["length"].mean()))
 
-    query = listify(query)
+    return score
 
-    # listify all the course titles and descriptions
-    for course in courses_dict:
-        courses_dict[course]["title"] = listify(courses_dict[course]["title"])
-        courses_dict[course]["description"] = listify(courses_dict[course]["description"])
+def query(query_text, k1=1.2, b=0.75):
+    # returns top 5 courses that match the query
+    query_text = query_text.lower()
 
-    # assign a score to each course
+    # tokenize query
+    query_blob = TextBlob(query_text)
+    query_tokens = query_blob.words
+
+    # lemmatize query
+    query_lemmas = [Word(token).lemmatize() for token in query_tokens]
+
+    # calculate BM25 scores for each course
     scores = {}
-    for course in courses_dict:
+    for course in courses_df.index:
         scores[course] = 0
-        for word in query:
-            if word in courses_dict[course]["title"]:
-                scores[course] += TITLE_WEIGHT
-        for word in query:
-            if word in courses_dict[course]["description"]:
-                scores[course] += DESC_WEIGHT
+        for term in query_lemmas:
+            scores[course] += BM25(term, course, k1, b)
 
-    # sort the courses by score
-    sorted_courses = sorted(scores, key=scores.get, reverse=True)
+    # increase the score based on synonyms
+    synonym_scores = {}
+    for course in courses_df.index:
+        synonym_scores[course] = 0
+        for term in query_lemmas:
+            for synset in Word(term).synsets:
+                for synonym in synset.lemmas():
+                    if synonym.name() in courses_df.columns:
+                        synonym_scores[course] += BM25(synonym.name(), course, k1, b)
 
-    # return the top 5 courses and their scores (if they have a score > 0)
-    return [(course, scores[course]) for course in sorted_courses if scores[course] > 0][:5]
+    # weigh score based on synonyms
+    for term in synonym_scores:
+        scores[course] = scores[course] * (1 - SYNONYM_WEIGHT) + synonym_scores[term] * SYNONYM_WEIGHT
 
+    # sort courses by score
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+    # return top 5 courses with scores above 0
+    top_courses = []
+    for course in sorted_scores:
+        if course[1] > 0:
+            top_courses.append(course[0])
+        if len(top_courses) == 5:
+            break
+
+    return top_courses
+
+
+print(query("text retrieval"))

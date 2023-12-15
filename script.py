@@ -1,4 +1,4 @@
-from js import document
+from js import document, fetch
 from pyodide.ffi import create_proxy
 from query import query
 
@@ -9,8 +9,7 @@ def runPython(*args, **kwargs):
     output = ""
     for course, score in results:
         url = f"https://cs.illinois.edu/academics/courses/{course.split()[0]}{course.split()[1]}"
-        # course and score only (no url)
-        output += f"{course} ({score})<br>"
+        output += f"{course}<br>"
         # url in smaller font
         output += f"<a href=\"{url}\" style=\"font-size: 0.8em;\">{url}</a><br>"
     if output:

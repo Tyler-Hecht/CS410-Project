@@ -5,17 +5,19 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
 nltk.download('words')
-from nltk.corpus import stopwords, words
+import nltk.corpus
 import random
 import pandas as pd
+import textblob as TextBlob
+
 
 # Limits to tokenization and lemmitization, respectively
-MAX_TOKENIZER_LEN = 5000000
-MAX_WORDS = 500000
+MAX_TOKENIZER_LEN = 100000000
+MAX_WORDS = 20000000
 
 # Weights for title and description
-TITLE_WEIGHT = 10
-DESCRIPTION_WEIGHT = 10
+TITLE_WEIGHT = 20
+DESCRIPTION_WEIGHT = 20
 
 # organizes the text into one large dataframe with words as columns and courses as rows
 # the values represent the number of times the word appears in the course
@@ -23,40 +25,45 @@ DESCRIPTION_WEIGHT = 10
 with open("../courses_dict.pkl", "rb") as f:
     courses_dict = pickle.load(f)
 
+def lemmatize(word):
+    # lemmatizes word with TextBlob
+    return TextBlob.Word(word).lemmatize()
 
-# # combine each term's text into one string and add the course title and description
+stopwords = set(nltk.corpus.stopwords.words('english'))
+
+# combine each term's text into one string and add the course title and description
 all_words_dict = {}
 for course in tqdm(courses_dict, position=0, leave=True):
-    all_words_dict[course] = ""
-    for term in tqdm(courses_dict[course]["text"], position=1, leave=False):
-        all_words_dict[course] += term + " "
-    all_words_dict[course] += courses_dict[course]["title"] + " "
-    all_words_dict[course] += courses_dict[course]["description"] + " "
+    all_words_dict[course] = " ".join(courses_dict[course]["text"])
+
+print("done combining text")
 
 # tokenize and lemmatize the words, and remove stopwords
-lemmatizer = nltk.stem.WordNetLemmatizer()
 lemmatized_dict = {}
 for course in tqdm(all_words_dict, position=0, leave=True):
-    words = all_words_dict[course]
-    if len(words) > MAX_TOKENIZER_LEN:
-        words = words[:MAX_TOKENIZER_LEN]
-    # go to last space before MAX_TOKENIZER_LEN
-    while words[-1] != " ":
-        words = words[:-1]
-    words = words[:MAX_TOKENIZER_LEN]
+    words = all_words_dict[course][:MAX_TOKENIZER_LEN]
+    if " " not in words: # if there is no space, then don't use text data
+        lemmatized_dict[course] = []
+        continue
+    # go to the last space
+    last_space = words.rfind(" ")
+    words = words[:last_space]
     words = nltk.word_tokenize(words)
     if len(words) > MAX_WORDS:
         words = random.sample(words, MAX_WORDS)
     lemmatized_words = []
     for word in tqdm(words, position=1, leave=False):
-        if word not in stopwords.words('english'):
-            lemmatized_words.append(lemmatizer.lemmatize(word))
+        if word not in stopwords:
+            lemmatized_words.append(lemmatize(word))
     lemmatized_dict[course] = lemmatized_words
+
+print("done tokenizing and lemmatizing")
 
 # find unique words
 unique_words = set()
 for course in tqdm(lemmatized_dict):
-    valid_words = words.words()
+    # get valid words from nltk
+    valid_words = nltk.corpus.words.words()
     course_words = lemmatized_dict[course]
     intersection = set(valid_words).intersection(course_words)
     unique_words = unique_words.union(intersection)
@@ -68,17 +75,19 @@ for course in tqdm(lemmatized_dict):
     lemmatized_title_words = []
     lemmatized_description_words = []
     for word in tqdm(title_words, position=1, leave=False):
-        if word not in stopwords.words('english'):
-            lemmatized_title_words.append(lemmatizer.lemmatize(word))
+        if word not in stopwords:
+            lemmatized_title_words.append(lemmatize(word))
     for word in tqdm(description_words, position=1, leave=False):
-        if word not in stopwords.words('english'):
-            lemmatized_description_words.append(lemmatizer.lemmatize(word))
+        if word not in stopwords:
+            lemmatized_description_words.append(lemmatize(word))
     title_words = lemmatized_title_words
     description_words = lemmatized_description_words
     intersection = set(valid_words).intersection(title_words)
     unique_words = unique_words.union(intersection)
     intersection = set(valid_words).intersection(description_words)
     unique_words = unique_words.union(intersection)
+
+print("done finding unique words")
 
 # create a dataframe with each course as a row and each word as a column
 courses_df = pd.DataFrame(columns=list(unique_words), dtype=int)
@@ -94,11 +103,11 @@ for course in tqdm(lemmatized_dict, position=0, leave=True):
     lemmatized_title_words = []
     lemmatized_description_words = []
     for word in tqdm(title_words, position=1, leave=False):
-        if word not in stopwords.words('english'):
-            lemmatized_title_words.append(lemmatizer.lemmatize(word))
+        if word not in stopwords:
+            lemmatized_title_words.append(lemmatize(word))
     for word in tqdm(description_words, position=1, leave=False):
-        if word not in stopwords.words('english'):
-            lemmatized_description_words.append(lemmatizer.lemmatize(word))
+        if word not in stopwords:
+            lemmatized_description_words.append(lemmatize(word))
     title_words = lemmatized_title_words
     description_words = lemmatized_description_words
     
@@ -118,7 +127,18 @@ for course in tqdm(lemmatized_dict, position=0, leave=True):
     for word in tqdm(description_words, position=1, leave=False):
         course_dict[word] += DESCRIPTION_WEIGHT
     courses_df.loc[course] = course_dict
-    
-with open("../courses_df.pkl", "wb") as f:
-    pickle.dump(courses_df, f)
 
+print(f"done creating dataframe, shape: {courses_df.shape}")
+
+# # convert words to TextBlob lemmas
+# new_columns = []
+# for word in tqdm(courses_df.columns, position=0, leave=True):
+#     new_columns.append(TextBlob.Word(word).lemmatize())
+# courses_df.columns = new_columns
+
+# # remove duplicate columns
+# courses_df = courses_df.groupby(courses_df.columns, axis=1).sum()
+
+# save courses_df
+with open("../courses_df2.pkl", "wb") as f:
+    pickle.dump(courses_df, f)
